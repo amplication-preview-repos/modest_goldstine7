@@ -1,0 +1,77 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DB_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model UtilityBill {
+  amount     Float?
+  billNumber String?
+  createdAt  DateTime  @default(now())
+  dueDate    DateTime?
+  id         String    @id @default(cuid())
+  paid       Boolean?
+  payments   Payment[]
+  updatedAt  DateTime  @updatedAt
+  user       User?     @relation(fields: [userId], references: [id])
+  userId     String?
+}
+
+model Payment {
+  amount        Float?
+  createdAt     DateTime                  @default(now())
+  id            String                    @id @default(cuid())
+  paymentDate   DateTime?
+  paymentMethod EnumPaymentPaymentMethod?
+  updatedAt     DateTime                  @updatedAt
+  utilityBill   UtilityBill?              @relation(fields: [utilityBillId], references: [id])
+  utilityBillId String?
+}
+
+model Notification {
+  createdAt        DateTime                          @default(now())
+  id               String                            @id @default(cuid())
+  message          String?
+  notificationType EnumNotificationNotificationType?
+  sent             Boolean?
+  updatedAt        DateTime                          @updatedAt
+  user             User?                             @relation(fields: [userId], references: [id])
+  userId           String?
+}
+
+model ApiIntegration {
+  apiKey    String?
+  apiName   String?
+  createdAt DateTime @default(now())
+  endpoint  String?
+  id        String   @id @default(cuid())
+  updatedAt DateTime @updatedAt
+  user      User?    @relation(fields: [userId], references: [id])
+  userId    String?
+}
+
+model User {
+  apiIntegrations ApiIntegration[]
+  createdAt       DateTime         @default(now())
+  email           String?          @unique
+  firstName       String?
+  id              String           @id @default(cuid())
+  lastName        String?
+  notifications   Notification[]
+  password        String
+  roles           Json
+  updatedAt       DateTime         @updatedAt
+  username        String           @unique
+  utilityBills    UtilityBill[]
+}
+
+enum EnumPaymentPaymentMethod {
+  Option1
+}
+
+enum EnumNotificationNotificationType {
+  Option1
+}
